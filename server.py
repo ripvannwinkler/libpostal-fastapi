@@ -1,4 +1,4 @@
-"""
+r"""
 libpostal-fastapi: Address parsing microservice.
 
 Wraps libpostal (via pypostal) in a FastAPI service providing four endpoints:
