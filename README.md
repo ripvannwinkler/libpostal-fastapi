@@ -56,7 +56,7 @@ With optional `language` and `country` parameters for disambiguation:
 
 ```bash
 curl 'http://localhost:8001/format?address=30+W+26th+St,+New+York,+NY&language=en&country=us'
-# {"address1":"30 W 26TH ST","address2":"","city":"NEW YORK","state":"NY","postal":"","country":""}
+# {"address1":"30 W 26TH ST","address2":"","city":"NEW YORK","state":"NY","postal":"","country":"US"}
 ```
 
 Includes `address2` for units, suites, etc.:

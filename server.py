@@ -9,7 +9,10 @@ from postal.parser import parse_address
 app = FastAPI(default_response_class=ORJSONResponse)
 
 
-def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
+def _build_structured(
+    parsed: list[list[str]],
+    user_country: str | None = None,
+) -> dict[str, str]:
     address1_parts: list[str] = []
     address2_parts: list[str] = []
     city = ""
@@ -48,6 +51,9 @@ def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
     if not country and re.fullmatch(r"[ABCEGHJ-NPRSTV-Z]\d[ABCEGHJ-NPRSTV-Z] ?\d[ABCEGHJ-NPRSTV-Z]\d", postal):
         country = "CA"
 
+    if not country and user_country:
+        country = user_country.upper()
+
     return {
         "address1": " ".join(address1_parts),
         "address2": " ".join(address2_parts) if address2_parts else "",
@@ -82,7 +88,7 @@ def format_address(
         detail = "Specifying country without specifying language is disallowed"
         raise HTTPException(status_code=400, detail=detail)
     parsed = parse_address(address=address, language=language, country=country)
-    return _build_structured(parsed)
+    return _build_structured(parsed, user_country=country)
 
 
 @app.get("/expand")
