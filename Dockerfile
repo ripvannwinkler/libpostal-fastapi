@@ -1,42 +1,54 @@
-FROM ghcr.io/alpha-affinity/snakepacker/buildtime:master as builder
+# syntax=docker/dockerfile:1
+
+FROM python:3.12-alpine AS builder
+
+RUN apk add --no-cache \
+    build-base \
+    linux-headers \
+    autoconf \
+    automake \
+    libtool \
+    curl \
+    git
+
 ARG TARGETARCH
 
-# install build dependencies
-RUN apt-install curl automake libtool libopenblas-openmp-dev
-
-# build libpostal from latest source
-RUN git clone --depth=1 https://github.com/openvenues/libpostal /code/libpostal
-WORKDIR /code/libpostal
-RUN ./bootstrap.sh && \
-    # https://github.com/openvenues/libpostal/pull/632#issuecomment-1648303654
-    ([ "$TARGETARCH" == "arm64" ] && ./configure --datadir=/usr/share/libpostal --disable-sse2 || ./configure --datadir=/usr/share/libpostal) && \
+# Build libpostal from source
+RUN git clone --depth=1 https://github.com/openvenues/libpostal /code/libpostal && \
+    cd /code/libpostal && \
+    ./bootstrap.sh && \
+    ([ "$TARGETARCH" = "arm64" ] && ./configure --datadir=/usr/share/libpostal --disable-sse2 || ./configure --datadir=/usr/share/libpostal) && \
     make -j4 && \
     make install && \
-    ldconfig && \
-    pkg-config --cflags libpostal
+    ldconfig
 
-# create venv
-RUN python3.12 -m venv ${VIRTUAL_ENV} && \
-    pip install -U pip setuptools wheel
+# Create venv and install Python deps
+RUN python3.12 -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --upgrade pip setuptools wheel
 
-# install and record server dependencies (copy runtime source code only in final stage)
 COPY requirements.txt .
-RUN pip install -r requirements.txt
-RUN find-libdeps ${VIRTUAL_ENV} > ${VIRTUAL_ENV}/pkgdeps.txt
+RUN PYPPOSTAL_LIBS=/usr/local/lib \
+    LD_LIBRARY_PATH=/usr/local/lib \
+    PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
+    /opt/venv/bin/pip install -r requirements.txt
 
-# final stage
-FROM ghcr.io/alpha-affinity/snakepacker/runtime:3.12-master
+# Final stage
+FROM python:3.12-alpine
 
-# copy libpostal and install venv
+ENV VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH" \
+    LD_LIBRARY_PATH=/usr/local/lib
+
+RUN apk add --no-cache openblas
+
 COPY --from=builder /usr/share/libpostal /usr/share/libpostal
-COPY --from=builder /usr/local/lib/libpostal.so.1 /usr/lib/
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-RUN xargs -ra ${VIRTUAL_ENV}/pkgdeps.txt apt-install
+COPY --from=builder /usr/local/lib/libpostal.so.1* /usr/local/lib/
+COPY --from=builder /usr/local/include/libpostal /usr/local/include/libpostal
+COPY --from=builder /opt/venv /opt/venv
 
-# smoketest
 RUN python -c "from postal.parser import parse_address; address = '123 Beech Lake Ct. Roswell, GA 30076'; print(parse_address(address))"
 
-# set server entrypoint
 WORKDIR /code
 COPY server.py .
 EXPOSE 8001/tcp
