@@ -97,6 +97,37 @@ if len(d)>0:
     assert all(isinstance(x,list) for x in d[0]), 'inner not lists'
 " 2>/dev/null && pass "nested structure valid" || fail "nested structure valid"
 
+# --- /format ---
+echo ""
+echo "--- /format ---"
+
+RESP=$(curl -sf --max-time 30 "$BASE_URL/format?address=201+n+state+st,+freeburg+il+62258")
+[ $? -eq 0 ] && pass "status 200" || fail "status 200"
+
+echo "$RESP" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+assert isinstance(d,dict), 'not a dict'
+assert d.get('address1')=='201 n state st', f\"address1 mismatch: {d.get('address1')}\"
+assert d.get('city')=='freeburg', f\"city mismatch: {d.get('city')}\"
+assert d.get('state')=='il', f\"state mismatch: {d.get('state')}\"
+assert d.get('postal')=='62258', f\"postal mismatch: {d.get('postal')}\"
+" 2>/dev/null && pass "freeburg IL address fields correct" || fail "freeburg IL address fields correct"
+
+RESP=$(curl -sf --max-time 30 "$BASE_URL/format?address=760+fountain+view+dr+apt+d+mascoutah+il+62258")
+[ $? -eq 0 ] && pass "status 200" || fail "status 200"
+
+echo "$RESP" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+assert isinstance(d,dict), 'not a dict'
+assert d.get('address1')=='760 fountain view dr', f\"address1 mismatch: {d.get('address1')}\"
+assert 'apt d' in (d.get('address2') or '').lower(), f\"address2 missing unit: {d.get('address2')}\"
+assert d.get('city')=='mascoutah', f\"city mismatch: {d.get('city')}\"
+assert d.get('state')=='il', f\"state mismatch: {d.get('state')}\"
+assert d.get('postal')=='62258', f\"postal mismatch: {d.get('postal')}\"
+" 2>/dev/null && pass "mascoutah IL address with unit fields correct" || fail "mascoutah IL address with unit fields correct"
+
 # --- Error cases ---
 echo ""
 echo "--- Error cases ---"

@@ -8,6 +8,49 @@ from postal.parser import parse_address
 app = FastAPI(default_response_class=ORJSONResponse)
 
 
+def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
+    address1_parts: list[str] = []
+    address2_parts: list[str] = []
+    city = ""
+    state = ""
+    postal = ""
+    country = ""
+
+    for value, component in parsed:
+        match component:
+            case "house_number" | "road":
+                address1_parts.append(value)
+            case (
+                "unit"
+                | "building"
+                | "entrance"
+                | "staircase"
+                | "level"
+                | "po_box"
+                | "house"
+                | "block"
+                | "neighbourhood"
+            ):
+                address2_parts.append(value)
+            case "city" | "suburb":
+                city = value
+            case "state" | "province":
+                state = value
+            case "postal_code":
+                postal = value
+            case "country":
+                country = value
+
+    return {
+        "address1": " ".join(address1_parts),
+        "address2": " ".join(address2_parts) if address2_parts else "",
+        "city": city,
+        "state": state,
+        "postal": postal,
+        "country": country,
+    }
+
+
 @app.get("/parse")
 def parse(
     address: str,
@@ -19,6 +62,20 @@ def parse(
         detail = "Specifying country without specifying language is disallowed"
         raise HTTPException(status_code=400, detail=detail)
     return parse_address(**locals())
+
+
+@app.get("/format")
+def format_address(
+    address: str,
+    language: Annotated[str | None, Query(min_length=2, max_length=2)] = None,
+    country: Annotated[str | None, Query(min_length=2, max_length=2)] = None,
+) -> dict[str, str]:
+    """Parse an address and return structured fields."""
+    if country is not None and language is None:
+        detail = "Specifying country without specifying language is disallowed"
+        raise HTTPException(status_code=400, detail=detail)
+    parsed = parse_address(address=address, language=language, country=country)
+    return _build_structured(parsed)
 
 
 @app.get("/expand")

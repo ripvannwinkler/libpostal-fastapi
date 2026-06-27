@@ -29,11 +29,20 @@ curl 'http://localhost:8001/parse?address=30+W+26th+St,+New+York,+NY'
 # [["30","house_number"],["w 26th st","road"],["new york","city"],["ny","state"]]
 ```
 
-With optional `language` and `country` parameters:
+### Format an address (structured output)
+
+Returns a JSON object with `address1`, `address2`, `city`, `state`, `postal`, and `country` fields:
 
 ```bash
-curl 'http://localhost:8001/parse?address=30+W+26th+St,+New+York,+NY&language=en&country=us'
-# [["30","house_number"],["w 26th st","road"],["new york","city"],["ny","state"]]
+curl 'http://localhost:8001/format?address=201+n+state+st,+freeburg+il+62258'
+# {"address1":"201 n state st","address2":"","city":"freeburg","state":"il","postal":"62258","country":""}
+```
+
+With optional `language` and `country` parameters for disambiguation:
+
+```bash
+curl 'http://localhost:8001/format?address=30+W+26th+St,+New+York,+NY&language=en&country=us'
+# {"address1":"30 w 26th st","address2":"","city":"new york","state":"ny","postal":"","country":""}
 ```
 
 ### Expand an address
