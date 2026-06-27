@@ -141,6 +141,17 @@ assert d.get('postal')=='62243-1234', f\"postal mismatch: {d.get('postal')}\"
 assert d.get('country')=='US', f\"country should be US for ZIP+4: {d.get('country')}\"
 " 2>/dev/null && pass "ZIP+4 auto-detects country as US" || fail "ZIP+4 auto-detects country as US"
 
+RESP=$(curl -sf --max-time 30 "$BASE_URL/format?address=123+ottawa+st,+toronto+on+m5h+2n2")
+[ $? -eq 0 ] && pass "status 200" || fail "status 200"
+
+echo "$RESP" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+assert isinstance(d,dict), 'not a dict'
+assert d.get('postal')=='M5H 2N2', f\"postal mismatch: {d.get('postal')}\"
+assert d.get('country')=='CA', f\"country should be CA for Canadian postal code: {d.get('country')}\"
+" 2>/dev/null && pass "Canadian postal code auto-detects country as CA" || fail "Canadian postal code auto-detects country as CA"
+
 # --- Error cases ---
 echo ""
 echo "--- Error cases ---"

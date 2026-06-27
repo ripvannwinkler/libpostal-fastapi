@@ -45,6 +45,9 @@ def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
     if not country and re.fullmatch(r"\d{5}(-\d{4})?", postal):
         country = "US"
 
+    if not country and re.fullmatch(r"[ABCEGHJ-NPRSTV-Z]\d[ABCEGHJ-NPRSTV-Z] ?\d[ABCEGHJ-NPRSTV-Z]\d", postal):
+        country = "CA"
+
     return {
         "address1": " ".join(address1_parts),
         "address2": " ".join(address2_parts) if address2_parts else "",

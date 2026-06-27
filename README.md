@@ -45,6 +45,13 @@ curl 'http://localhost:8001/format?address=201+n+state+st,+freeburg+il+62243-123
 # {"address1":"201 N STATE ST","address2":"","city":"FREEBURG","state":"IL","postal":"62243-1234","country":"US"}
 ```
 
+Auto-detected as `"CA"` when the postal code matches a Canadian format (A1A 1A1):
+
+```bash
+curl 'http://localhost:8001/format?address=123+ottawa+st,+toronto+on+m5h+2n2'
+# {"address1":"123 OTTAWA ST","address2":"","city":"TORONTO","state":"ON","postal":"M5H 2N2","country":"CA"}
+```
+
 With optional `language` and `country` parameters for disambiguation:
 
 ```bash
