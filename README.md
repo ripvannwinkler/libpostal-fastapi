@@ -35,7 +35,14 @@ Returns a JSON object with `address1`, `address2`, `city`, `state`, `postal`, an
 
 ```bash
 curl 'http://localhost:8001/format?address=201+n+state+st,+freeburg+il+62258'
-# {"address1":"201 N STATE ST","address2":"","city":"FREEBURG","state":"IL","postal":"62258","country":""}
+# {"address1":"201 N STATE ST","address2":"","city":"FREEBURG","state":"IL","postal":"62258","country":"US"}
+```
+
+`country` is auto-detected as `"US"` when the postal code matches a US ZIP pattern (5 or 9 digits):
+
+```bash
+curl 'http://localhost:8001/format?address=201+n+state+st,+freeburg+il+62243-1234'
+# {"address1":"201 N STATE ST","address2":"","city":"FREEBURG","state":"IL","postal":"62243-1234","country":"US"}
 ```
 
 With optional `language` and `country` parameters for disambiguation:
@@ -49,7 +56,7 @@ Includes `address2` for units, suites, etc.:
 
 ```bash
 curl 'http://localhost:8001/format?address=760+fountain+view+dr+apt+d+mascoutah+il+62258'
-# {"address1":"760 FOUNTAIN VIEW DR","address2":"APT D","city":"MASCOUTAH","state":"IL","postal":"62258","country":""}
+# {"address1":"760 FOUNTAIN VIEW DR","address2":"APT D","city":"MASCOUTAH","state":"IL","postal":"62258","country":"US"}
 ```
 
 ### Expand an address

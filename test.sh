@@ -112,6 +112,7 @@ assert d.get('address1')=='201 N STATE ST', f\"address1 mismatch: {d.get('addres
 assert d.get('city')=='FREEBURG', f\"city mismatch: {d.get('city')}\"
 assert d.get('state')=='IL', f\"state mismatch: {d.get('state')}\"
 assert d.get('postal')=='62258', f\"postal mismatch: {d.get('postal')}\"
+assert d.get('country')=='US', f\"country should be US for 5-digit ZIP: {d.get('country')}\"
 " 2>/dev/null && pass "freeburg IL address fields correct" || fail "freeburg IL address fields correct"
 
 RESP=$(curl -sf --max-time 30 "$BASE_URL/format?address=760+fountain+view+dr+apt+d+mascoutah+il+62258")
@@ -126,7 +127,19 @@ assert 'APT D' in (d.get('address2') or ''), f\"address2 missing unit: {d.get('a
 assert d.get('city')=='MASCOUTAH', f\"city mismatch: {d.get('city')}\"
 assert d.get('state')=='IL', f\"state mismatch: {d.get('state')}\"
 assert d.get('postal')=='62258', f\"postal mismatch: {d.get('postal')}\"
+assert d.get('country')=='US', f\"country should be US for 5-digit ZIP: {d.get('country')}\"
 " 2>/dev/null && pass "mascoutah IL address with unit fields correct" || fail "mascoutah IL address with unit fields correct"
+
+RESP=$(curl -sf --max-time 30 "$BASE_URL/format?address=201+n+state+st,+freeburg+il+62243-1234")
+[ $? -eq 0 ] && pass "status 200" || fail "status 200"
+
+echo "$RESP" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+assert isinstance(d,dict), 'not a dict'
+assert d.get('postal')=='62243-1234', f\"postal mismatch: {d.get('postal')}\"
+assert d.get('country')=='US', f\"country should be US for ZIP+4: {d.get('country')}\"
+" 2>/dev/null && pass "ZIP+4 auto-detects country as US" || fail "ZIP+4 auto-detects country as US"
 
 # --- Error cases ---
 echo ""

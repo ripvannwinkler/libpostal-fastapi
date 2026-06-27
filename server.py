@@ -1,3 +1,4 @@
+import re
 from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Query
@@ -40,6 +41,9 @@ def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
                 postal = value.upper()
             case "country":
                 country = value.upper()
+
+    if not country and re.fullmatch(r"\d{5}(-\d{4})?", postal):
+        country = "US"
 
     return {
         "address1": " ".join(address1_parts),
