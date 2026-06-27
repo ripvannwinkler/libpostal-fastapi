@@ -108,9 +108,9 @@ echo "$RESP" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
 assert isinstance(d,dict), 'not a dict'
-assert d.get('address1')=='201 n state st', f\"address1 mismatch: {d.get('address1')}\"
-assert d.get('city')=='freeburg', f\"city mismatch: {d.get('city')}\"
-assert d.get('state')=='il', f\"state mismatch: {d.get('state')}\"
+assert d.get('address1')=='201 N STATE ST', f\"address1 mismatch: {d.get('address1')}\"
+assert d.get('city')=='FREEBURG', f\"city mismatch: {d.get('city')}\"
+assert d.get('state')=='IL', f\"state mismatch: {d.get('state')}\"
 assert d.get('postal')=='62258', f\"postal mismatch: {d.get('postal')}\"
 " 2>/dev/null && pass "freeburg IL address fields correct" || fail "freeburg IL address fields correct"
 
@@ -121,10 +121,10 @@ echo "$RESP" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
 assert isinstance(d,dict), 'not a dict'
-assert d.get('address1')=='760 fountain view dr', f\"address1 mismatch: {d.get('address1')}\"
-assert 'apt d' in (d.get('address2') or '').lower(), f\"address2 missing unit: {d.get('address2')}\"
-assert d.get('city')=='mascoutah', f\"city mismatch: {d.get('city')}\"
-assert d.get('state')=='il', f\"state mismatch: {d.get('state')}\"
+assert d.get('address1')=='760 FOUNTAIN VIEW DR', f\"address1 mismatch: {d.get('address1')}\"
+assert 'APT D' in (d.get('address2') or ''), f\"address2 missing unit: {d.get('address2')}\"
+assert d.get('city')=='MASCOUTAH', f\"city mismatch: {d.get('city')}\"
+assert d.get('state')=='IL', f\"state mismatch: {d.get('state')}\"
 assert d.get('postal')=='62258', f\"postal mismatch: {d.get('postal')}\"
 " 2>/dev/null && pass "mascoutah IL address with unit fields correct" || fail "mascoutah IL address with unit fields correct"
 

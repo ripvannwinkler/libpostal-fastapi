@@ -35,14 +35,21 @@ Returns a JSON object with `address1`, `address2`, `city`, `state`, `postal`, an
 
 ```bash
 curl 'http://localhost:8001/format?address=201+n+state+st,+freeburg+il+62258'
-# {"address1":"201 n state st","address2":"","city":"freeburg","state":"il","postal":"62258","country":""}
+# {"address1":"201 N STATE ST","address2":"","city":"FREEBURG","state":"IL","postal":"62258","country":""}
 ```
 
 With optional `language` and `country` parameters for disambiguation:
 
 ```bash
 curl 'http://localhost:8001/format?address=30+W+26th+St,+New+York,+NY&language=en&country=us'
-# {"address1":"30 w 26th st","address2":"","city":"new york","state":"ny","postal":"","country":""}
+# {"address1":"30 W 26TH ST","address2":"","city":"NEW YORK","state":"NY","postal":"","country":""}
+```
+
+Includes `address2` for units, suites, etc.:
+
+```bash
+curl 'http://localhost:8001/format?address=760+fountain+view+dr+apt+d+mascoutah+il+62258'
+# {"address1":"760 FOUNTAIN VIEW DR","address2":"APT D","city":"MASCOUTAH","state":"IL","postal":"62258","country":""}
 ```
 
 ### Expand an address

@@ -19,7 +19,7 @@ def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
     for value, component in parsed:
         match component:
             case "house_number" | "road":
-                address1_parts.append(value)
+                address1_parts.append(value.upper())
             case (
                 "unit"
                 | "building"
@@ -31,15 +31,15 @@ def _build_structured(parsed: list[list[str]]) -> dict[str, str]:
                 | "block"
                 | "neighbourhood"
             ):
-                address2_parts.append(value)
+                address2_parts.append(value.upper())
             case "city" | "suburb":
-                city = value
+                city = value.upper()
             case "state" | "province":
-                state = value
-            case "postal_code":
-                postal = value
+                state = value.upper()
+            case "postal_code" | "postcode":
+                postal = value.upper()
             case "country":
-                country = value
+                country = value.upper()
 
     return {
         "address1": " ".join(address1_parts),
