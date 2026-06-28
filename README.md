@@ -15,7 +15,7 @@ The Dockerfile uses `python:3.12-alpine` as the base image and compiles libposta
 Start the server:
 
 ```bash
-docker run --rm -p 8001:8001 libpostal-fastapi
+docker run --rm -p 127.0.0.1:8001:8001 libpostal-fastapi
 ```
 
 The server starts on port `8001`. View interactive API docs at [`http://localhost:8001/docs`](http://localhost:8001/docs).
